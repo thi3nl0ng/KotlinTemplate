@@ -30,13 +30,16 @@ import sample.api.config.ErrorModel
 
 fun Route.userController(userService: UserService) {     
     route("/users") {
-        get {
+        get ({
+            description = "Get all users"
+            summary = "Get all users"})
+        {
             call.respond(userService.getAllUsers())
         }
 
         post ({
-                description = "Creates a new user"
-
+                description = "Create a new user"
+                summary = "Create a new user"
                 request {
                     body<UserRequest> {
                         description = "add new user"
@@ -75,6 +78,7 @@ fun Route.userController(userService: UserService) {
        
         get("/{id}",{
             description = "Get user by id"
+            summary = "Get user by id"
             request {
                 queryParameter<String>("id") {
                     description = "the user id"
@@ -106,13 +110,14 @@ fun Route.userController(userService: UserService) {
         }
 
         post("/{id}",{
-            description = "Get user by id"
+            description = "Update user by id"
+            summary = "Update user"
             request {
                 queryParameter<String>("id") {
-                    description = "the user id"
+                    description = "The user id"
                 }
                 body<UserRequest> {
-                    description = "add new user"
+                    description = "Add new user"
                     required = true
                     example("Add new user 1") {
                         value = UserRequest( 
@@ -132,9 +137,9 @@ fun Route.userController(userService: UserService) {
 
             response {
                 code(HttpStatusCode.OK) {
-                    description = "successful request - always returns the user object"
+                    description = "Successful request - always returns the user object"
                     body<User> {
-                        description = "the user object."
+                        description = "The user object."
                         mediaTypes(ContentType.Application.Json)
                         required = true
                     }
@@ -161,12 +166,13 @@ fun Route.userController(userService: UserService) {
 
         delete("/{id}",{
             // description of the route
-            description = "delete user by id"
+            description = "Delete user by id"
+            summary = "Delete user"
             // information about the request
             request {
                 // information about the query-parameter "name" of type "string"
                 queryParameter<String>("id") {
-                    description = "the user id"
+                    description = "The user id"
                 }
             }
 
@@ -174,7 +180,7 @@ fun Route.userController(userService: UserService) {
                 // information about a "200 OK" response
                 code(HttpStatusCode.OK) {
                     // a description of the response
-                    description = "successful request - always returns the return message"
+                    description = "Successful request - always returns the return message"
                 }
             }           
         }) {  
@@ -194,6 +200,7 @@ fun Route.userController(userService: UserService) {
 
         post("/testpost", {
             description = "Creates a new user"
+            summary = "Just a test endpoint"
             request {
                 body<UserRequest> {
                     description = "Test add new user"
@@ -215,7 +222,7 @@ fun Route.userController(userService: UserService) {
             response {
                 code(HttpStatusCode.OK) {
                     body<User> {
-                        description = "the created user"
+                        description = "The created user"
                         example("John") {
                             value = User(
                                 id = 1,
