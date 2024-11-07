@@ -26,10 +26,7 @@ import io.github.smiley4.ktorswaggerui.routing.swaggerUI
 import io.github.smiley4.ktorswaggerui.data.*
 import io.github.smiley4.ktorswaggerui.dsl.config.PluginConfigDsl
 
-import io.github.smiley4.ktorswaggerui.SwaggerUI
 import io.github.smiley4.ktorswaggerui.dsl.routing.get
-import io.github.smiley4.ktorswaggerui.routing.openApiSpec
-import io.github.smiley4.ktorswaggerui.routing.swaggerUI
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -55,6 +52,7 @@ fun Application.module() {
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Delete)
         allowHeader(HttpHeaders.ContentType)
     }    
 
@@ -74,10 +72,12 @@ fun Application.module() {
             url = "http://localhost:8080"
             description = "Development Server"
         }
+
         server {
             url = "https://www.ediel.no"
             description = "Production Server"
         }
+
         security {
             // configure a basic-auth security scheme
             securityScheme("MySecurityScheme") {
@@ -146,17 +146,19 @@ fun Application.module() {
                     }
                 )
             }
+
             client = HttpClient(Apache)       
         } 
     }
 
     val userService = UserService()
   
-    routing { 
-     
+    routing {  
+
         route("swagger-ui") {
             swaggerUI("/api.json")
         }
+
         route("api.json") {
             openApiSpec()
         }
@@ -188,6 +190,7 @@ fun Application.module() {
                     }
 
                     call.respondRedirect("/")
+
                 } else {
                     call.respond(HttpStatusCode.Unauthorized, "Invalid access token.")
                 }            
@@ -210,8 +213,7 @@ fun Application.module() {
                     description = "successful request - always returns 'Welcome to Sample API v2.0'"
                 }
             }
-        }
-            ) {
+        }) {
            call.respondText("Welcome to Sample API v2.0", status = HttpStatusCode.Created)
         } 
     }

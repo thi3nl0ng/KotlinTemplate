@@ -15,7 +15,18 @@ import io.github.smiley4.ktorswaggerui.SwaggerUI
 import io.github.smiley4.ktorswaggerui.dsl.routing.get
 import io.github.smiley4.ktorswaggerui.routing.openApiSpec
 import io.github.smiley4.ktorswaggerui.routing.swaggerUI
-
+import io.github.smiley4.ktorswaggerui.dsl.routing.delete
+import io.github.smiley4.ktorswaggerui.dsl.routing.post
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.application.call
+import io.ktor.server.application.install
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.server.response.respond
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
+import sample.api.config.ErrorModel
 
 fun Route.userController(userService: UserService) {     
     route("/users") {
@@ -23,29 +34,55 @@ fun Route.userController(userService: UserService) {
             call.respond(userService.getAllUsers())
         }
 
-        post () {     
-            // Receive the User object from the request body
+        post ({
+                description = "Creates a new user"
+
+                request {
+                    body<UserRequest> {
+                        description = "add new user"
+                        required = true
+                        example("Add new user 1") {
+                            value = UserRequest( 
+                                name = "John Doe",
+                                email = "john@example.com"
+                            )
+                        }
+
+                        example("Add new user 2") {
+                            value = UserRequest(
+                                name = "Jane Doe",
+                                email = "jane@example.com"
+                            )
+                        }
+                    }
+                }
+                response {
+                    code(HttpStatusCode.OK) {
+                        description = "successful request - always returns the user object"
+                        body<User> {
+                            description = "the user object."
+                            mediaTypes(ContentType.Application.Json)
+                            required = true
+                        }
+                    }
+                } 
+            }) { 
+
             val user = call.receive<UserRequest>()
             var addedUser = userService.addUser(user)
-            // Respond with the created user (echoing back)           
-            call.respond(HttpStatusCode.OK, addedUser) // Respond with the updated user if found
+            call.respond(HttpStatusCode.OK, addedUser) 
         }
        
         get("/{id}",{
-            // description of the route
             description = "Get user by id"
-            // information about the request
             request {
-                // information about the query-parameter "name" of type "string"
                 queryParameter<String>("id") {
                     description = "the user id"
                 }
             }
 
              response {
-                // information about a "200 OK" response
                 code(HttpStatusCode.OK) {
-                    // a description of the response
                     description = "successful request - always returns the user object"
                     body<User> {
                         description = "the user object."
@@ -68,25 +105,79 @@ fun Route.userController(userService: UserService) {
             }
         }
 
-        put("/{id}") {
+        post("/{id}",{
+            description = "Get user by id"
+            request {
+                queryParameter<String>("id") {
+                    description = "the user id"
+                }
+                body<UserRequest> {
+                    description = "add new user"
+                    required = true
+                    example("Add new user 1") {
+                        value = UserRequest( 
+                            name = "John Doe",
+                            email = "john@example.com"
+                        )
+                    }
+
+                    example("Add new user 2") {
+                        value = UserRequest(
+                            name = "Jane Doe",
+                            email = "jane@example.com"
+                        )
+                    }
+                }
+            }
+
+            response {
+                code(HttpStatusCode.OK) {
+                    description = "successful request - always returns the user object"
+                    body<User> {
+                        description = "the user object."
+                        mediaTypes(ContentType.Application.Json)
+                        required = true
+                    }
+                }
+            }           
+        }
+        ) {
+         
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
-                return@put
+                return@post
             }
 
-            // Receive the User object from the request body
             val user = call.receive<UserRequest>()
             var updatedUser = userService.updateUser(id, user)
 
             if (updatedUser != null) {
-                call.respond(HttpStatusCode.OK, updatedUser) // Respond with the updated user if found
+                call.respond(HttpStatusCode.OK, updatedUser) 
             } else {
-                call.respond(HttpStatusCode.NotFound, "User not found") // Respond with 404 if the user wasn't found
+                call.respond(HttpStatusCode.NotFound, "User not found") 
             }
         }
 
-        delete("/{id}") {  
+        delete("/{id}",{
+            // description of the route
+            description = "delete user by id"
+            // information about the request
+            request {
+                // information about the query-parameter "name" of type "string"
+                queryParameter<String>("id") {
+                    description = "the user id"
+                }
+            }
+
+             response {
+                // information about a "200 OK" response
+                code(HttpStatusCode.OK) {
+                    // a description of the response
+                    description = "successful request - always returns the return message"
+                }
+            }           
+        }) {  
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
@@ -100,6 +191,51 @@ fun Route.userController(userService: UserService) {
                 call.respond(HttpStatusCode.NotFound, "User not found")
             }
         }
-        
+
+        post("/testpost", {
+            description = "Creates a new user"
+            request {
+                body<UserRequest> {
+                    description = "Test add new user"
+                    required = true
+                    example("New User 1") {
+                        value = UserRequest( 
+                            name = "John Doe",
+                            email = "john@example.com"
+                        )
+                    }
+                    example("New User 2") {
+                        value = UserRequest(
+                            name = "Jane Doe",
+                            email = "jane@example.com"
+                        )
+                    }
+                }
+            }
+            response {
+                code(HttpStatusCode.OK) {
+                    body<User> {
+                        description = "the created user"
+                        example("John") {
+                            value = User(
+                                id = 1,
+                                name = "John",
+                                email = "john@example.com"
+                            )
+                        }
+                        example("Jane") {
+                            value = User(
+                                id = 2,
+                                name = "Jane",
+                                email = "jane@example.com"
+                            )
+                        }
+                    }
+                }
+                
+            }
+        }) {
+            call.respond(HttpStatusCode.NotImplemented, Unit)
+        }        
     }
 }
