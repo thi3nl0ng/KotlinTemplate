@@ -99,7 +99,7 @@ fun Application.module() {
             tagGenerator = { url -> listOf(url.firstOrNull()) }
             tag("users") {
                 description = "routes to manage users"
-                externalDocUrl = "example.com"
+                externalDocUrl = "https://github.com/thi3nl0ng/KotlinTemplate"
                 externalDocDescription = "Users documentation"
             }            
         }
