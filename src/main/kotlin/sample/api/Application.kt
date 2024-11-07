@@ -74,7 +74,7 @@ fun Application.module() {
         }
 
         server {
-            url = "https://www.ediel.no"
+            url = "https://www.your.production.site"
             description = "Production Server"
         }
 
