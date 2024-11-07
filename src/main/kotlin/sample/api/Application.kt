@@ -100,7 +100,7 @@ fun Application.module() {
             tag("users") {
                 description = "routes to manage users"
                 externalDocUrl = "https://github.com/thi3nl0ng/KotlinTemplate"
-                externalDocDescription = "Users documentation"
+                externalDocDescription = "Users documentation (by Huy Duong)"
             }            
         }
     }    
