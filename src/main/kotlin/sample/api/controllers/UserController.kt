@@ -17,6 +17,7 @@ import io.github.smiley4.ktorswaggerui.routing.openApiSpec
 import io.github.smiley4.ktorswaggerui.routing.swaggerUI
 import io.github.smiley4.ktorswaggerui.dsl.routing.delete
 import io.github.smiley4.ktorswaggerui.dsl.routing.post
+import io.github.smiley4.ktorswaggerui.dsl.routing.put
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -109,7 +110,7 @@ fun Route.userController(userService: UserService) {
             }
         }
 
-        post("/{id}",{
+        put("/{id}",{
             description = "Update user by id"
             summary = "Update user"
             request {
@@ -151,7 +152,7 @@ fun Route.userController(userService: UserService) {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
-                return@post
+                return@put
             }
 
             val user = call.receive<UserRequest>()
